@@ -16,7 +16,7 @@
   # ---- Begin ROS configuration ----
 
   services.ros.enable = true;
-  
+
   programs.ros.packages = [
     "xacro"
     "realsense2-camera"
@@ -35,29 +35,64 @@
   programs.ros.myIP = "192.168.0.235";
   services.ros.rosbridge.enable = true;
 
-  services.ros.elevationMapping.build = true;
-
-  services.ros.realsense2.enable = false;
-
-  # services.ros.runServices.canRawNode = {
-  #   packageName = "can_raw";
-  #   executable = "can_raw_node";
-  #   workspace = "/home/lunabotics/goliath/catkin_ws";
-  # };
-  # currently included in motor_ctrl/motor.launch
-
-  # services.ros.launchServices.motor-ctrl = {
-  #   packageName = "motor_ctrl";
-  #   launchFile = "motor.launch";
-  #   workspace = "/home/lunabotics/goliath/catkin_ws";
-  # };
-
-  services.ros.launchServices.test-map = {
-    packageName = "mapping";
-    launchFile = "test_map.launch";
-    workspace = "/home/lunabotics/goliath/catkin_ws";
+  # Cameras and tracking.
+  services.ros.launchServices = {
+    d455 = {
+      packageName = "realsense2_camera";
+      launchFile = "rs_camera.launch";
+      options = {
+        camera = "d455";
+        filters = "pointcloud";
+        depth_fps = 30;
+        depth_width = 640;
+        depth_height = 480;
+        enable_color = false;
+        pointcloud_texture_tream = "RS2_STREAM_ANY";
+      };
+    };
+    t265 = {
+      packageName = "realsense2_camera";
+      launchFile = "rs_t265.launch";
+      options.camera = "t265";
+    };
   };
 
+  # Pose publishing.
+  services.ros.runServices.pose_pub = {
+    packageName = "mapping";
+    executable = "pose_pub";
+  };
+
+  # Positioning.
+  services.ros.staticTransforms = [
+    # Use the t265 for the mapping origin.
+    { parent = "map"; child = "t265_odom_frame"; }
+
+    # Robot transforms.
+    { parent = "t265_link"; child = "base_link"; }
+    {
+      parent = "t265_link";
+      child = "d455_link";
+      x = 0.045;
+      z = 0.09;
+      pitch = 12.5;
+    }
+  ];
+
+  # Elevation mapping.
+  services.ros.elevationMapping = {
+    enable = true;
+    pointClouds = [ "d455" ];
+    trackPointFrameId = "t265_link";
+  };
+
+  # Convert elevation map to occupancy grid.
+  services.ros.runServices.cvt_occupancy = {
+    packageName = "mapping";
+    executable = "cvt_occupancy";
+  };
+
+  # Autonomous navigation within the occupancy grid.
   services.ros.moveBase = {
     enable = true;
     robotSize = { width = 0.25; length = 0.4; };
@@ -65,16 +100,23 @@
     limits = { forwardMin = 1.0; forward = 3.0; };
   };
 
-  # services.ros.staticTransforms = [
-  #   { parent = "sensor_frame"; child = "t265_link"; z = 0.095; }
-  #   { parent = "sensor_frame"; child = "d455_link";
-  #     x = -0.045; z = 0.185; pitch = 15.0; yaw = 180.0;
-  #   }
-  #   { parent = "base_link"; child = "sensor_frame";
-  #     z = 0.1209;
-  #   }
+  # Conversion from cmd_vel to motor commands.
+  services.ros.runServices.motor_ctrl = {
+    packageName = "motor_ctrl";
+    executable = "motor_ctrl_node";
+    rosParams = {
+      wheel_diameter = 0.025;
+      wheel_base = 0.159;
+      max_rpm = 512;
+      topics = [ "cmd_vel" "joy_teleop/cmd_vel" "move_base/cmd_vel" ];
+    };
+  };
 
-  #   { parent = "t265_odom"; child = "map"; }
-  # ];
+  # CAN output to hardware.
+  services.ros.runServices.canRawNode = {
+    packageName = "can_raw";
+    executable = "can_raw_node";
+    workspace = "/home/lunabotics/goliath/catkin_ws";
+  };
 }
 
