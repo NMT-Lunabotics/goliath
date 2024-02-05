@@ -61,6 +61,7 @@
   services.ros.runServices.pose_pub = {
     packageName = "mapping";
     executable = "pose_pub";
+    workspace = "/home/lunabotics/goliath/catkin_ws";
   };
 
   # Positioning.
@@ -90,6 +91,7 @@
   services.ros.runServices.cvt_occupancy = {
     packageName = "mapping";
     executable = "cvt_occupancy";
+    workspace = "/home/lunabotics/goliath/catkin_ws";
   };
 
   # Autonomous navigation within the occupancy grid.
@@ -104,6 +106,7 @@
   services.ros.runServices.motor_ctrl = {
     packageName = "motor_ctrl";
     executable = "motor_ctrl_node";
+    workspace = "/home/lunabotics/goliath/catkin_ws";
     rosParams = pkgs.writeText "params.yaml" (builtins.toJSON {
       wheel_diameter = 0.025;
       wheel_base = 0.159;
