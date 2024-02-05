@@ -104,12 +104,12 @@
   services.ros.runServices.motor_ctrl = {
     packageName = "motor_ctrl";
     executable = "motor_ctrl_node";
-    rosParams = {
+    rosParams = pkgs.writeText "params.yaml" (builtins.toJSON {
       wheel_diameter = 0.025;
       wheel_base = 0.159;
       max_rpm = 512;
       topics = [ "cmd_vel" "joy_teleop/cmd_vel" "move_base/cmd_vel" ];
-    };
+    });
   };
 
   # CAN output to hardware.
