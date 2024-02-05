@@ -43,10 +43,10 @@
       args = {
         camera = "d455";
         filters = "pointcloud";
-        depth_fps = 30;
-        depth_width = 640;
-        depth_height = 480;
-        enable_color = false;
+        depth_fps = "30";
+        depth_width = "640";
+        depth_height = "480";
+        enable_color = "false";
         pointcloud_texture_tream = "RS2_STREAM_ANY";
       };
     };
