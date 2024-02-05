@@ -40,7 +40,7 @@
     d455 = {
       packageName = "realsense2_camera";
       launchFile = "rs_camera.launch";
-      args = {
+      rosParams = {
         camera = "d455";
         filters = "pointcloud";
         depth_fps = "30";
@@ -53,7 +53,7 @@
     t265 = {
       packageName = "realsense2_camera";
       launchFile = "rs_t265.launch";
-      args.camera = "t265";
+      rosParams.camera = "t265";
     };
   };
 
