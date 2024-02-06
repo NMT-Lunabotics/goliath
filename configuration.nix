@@ -40,7 +40,7 @@
     d455 = {
       packageName = "realsense2_camera";
       launchFile = "rs_camera.launch";
-      rosParams = pkgs.writeText "params.yaml" (builtins.toJSON {
+      args = {
         camera = "d455";
         filters = "pointcloud";
         depth_fps = "30";
@@ -48,14 +48,12 @@
         depth_height = "480";
         enable_color = "false";
         pointcloud_texture_tream = "RS2_STREAM_ANY";
-      });
+      };
     };
     t265 = {
       packageName = "realsense2_camera";
       launchFile = "rs_t265.launch";
-      rosParams = pkgs.writeText "params.yaml" (builtins.toJSON {
-        camera = "t265";
-      });
+      args.camera = "t265";
     };
   };
 
